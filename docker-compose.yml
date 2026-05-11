@@ -1,6 +1,8 @@
 services:
   tududi:
-    image: chrisvel/tududi:latest
+    # This fork (TW199501/tududi) ships images to GHCR via .github/workflows/docker-release.yml
+    # Override with TUDUDI_IMAGE if you want to test upstream chrisvel/tududi:latest instead.
+    image: ${TUDUDI_IMAGE:-ghcr.io/tw199501/tududi:latest}
     container_name: tududi
     environment:
       - TUDUDI_USER_EMAIL=admin@example.com
