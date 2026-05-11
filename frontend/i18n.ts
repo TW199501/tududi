@@ -42,7 +42,7 @@ i18nInstance
     .init({
         fallbackLng: 'en',
         debug: false,
-        load: 'languageOnly',
+        load: 'all',
         supportedLngs: [
             'en',
             'es',
@@ -60,6 +60,7 @@ i18nInstance
             'nl',
             'ro',
             'zh',
+            'zh-TW',
             'pt',
             'id',
             'no',
