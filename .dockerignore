@@ -27,12 +27,26 @@
 # Development databases
 **/db/*.sqlite3*
 **/*.sqlite3*
+**/*.sqlite
+**/*.sqlite-shm
+**/*.sqlite-wal
 **/db/*.db
 backend/db/
 backend/uploads/
 uploads/
 backend/tests/
 backend/dist/
+
+# E2E tests (not needed in production runtime)
+e2e/
+test-results/
+.playwright-mcp/
+
+# Demo / verification artifacts
+demo/
+verify-shot-*.png
+verify-01-*.png
+demo-preview-*.png
 
 # IDE and editor files
 .vscode/

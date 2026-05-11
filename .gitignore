@@ -2,6 +2,9 @@
 *.sqlite3
 *.sqlite3-shm
 *.sqlite3-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 certs/
 .DS_Store
 .cursor
@@ -51,6 +54,7 @@ public/assets/
 # Playwright test results
 test-results/
 .last-run.json
+.playwright-mcp
 
 # Test files
 backend/tests/test-files/
