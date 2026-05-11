@@ -400,28 +400,71 @@ git push origin dev
 
 ---
 
-## Versioning Decision (填寫處)
-
-> **執行 Phase C 前在這裡寫下你選的版本號，之後對照確認**
+## Versioning Decision
 
 ```
-First release version: v____________________
-Reason: ____________________
+First release version: v1.1.0-rc.2-tw.1
+Reason: 接上游 rc.2、-tw.1 標記為 fork 第一變體，零撞 upstream 風險
 ```
 
 ---
 
-## Risk Matrix
+## Post-Release Notes (2026-05-12)
+
+**Date executed:** 2026-05-12 03:51–04:03 (台北標準時間)
+**Version released:** `v1.1.0-rc.2-tw.1`
+**Build duration:** 2m44s (GitHub Actions ubuntu-latest)
+**Total time including dry-run:** ~12 分鐘
+
+### What went smoothly
+- **Phase A 預檢有抓到 workflow permissions=read**，一條 gh api PUT 解決
+- 三分支 (main/dev/release) 同步 + push 順暢
+- 第二次 smoke (`v0.0.0-smoke.2`) 一路綠燈
+- `gh release create --generate-notes` 真的會自動產 changelog（含「Full Changelog: v0.0.0-smoke.2..v1.1.0-rc.2-tw.1」連結）
+
+### What got stuck (要修進原計畫)
+
+1. **SQLite 鎖卡住 git switch**（plan 沒寫進 Risk Matrix）
+   - 症狀: `release.sh` 跑 `git switch release` 時 `unable to unlink 'backend/database.sqlite': Invalid argument`
+   - 根因: 後端 dev server 持 SQLite 連線、Windows handle 在 process 死後不立即釋放
+   - workaround: 不切分支，改用 `git update-ref refs/heads/release dev` + 在 dev commit/tag
+   - 永久解: 已加 `release.sh` 前置檢測 `database.sqlite-shm/-wal` 存在則 abort（commit `ef296f7`）
+
+2. **YAML parse error in --notes multi-line string**
+   - 症狀: workflow 0s 失敗、`workflowName` 顯示路徑而非 `Docker Release`
+   - 根因: `--notes "..."` 多行字串內含縮排回 0 的 `## Docker Image`，終止 `run: |` block scalar
+   - 修法: 改用 `--notes-file /tmp/release-notes.md`（commit `f9716c1`）
+
+3. **gh CLI 預設 repo 指 upstream**
+   - 症狀: `gh run list` 跑去 chrisvel/tududi 找 workflow（404）
+   - 修法: `gh repo set-default TW199501/tududi`
+
+4. **gh CLI 缺 write:packages scope**
+   - 症狀: `gh api /user/packages/...` 拒 403
+   - 影響: 不能用 CLI 設 GHCR public、不能用 CLI 刪 GHCR image
+   - workaround: 在 GitHub web UI 點 Settings 改
+
+### Adjustments for next release
+
+- ✅ **release.sh 已修**: 加 SQLite lock 預檢、提示前置操作（commit `ef296f7`）
+- ✅ **docker-release.yml 已修**: notes 用獨立檔，避開縮排雷（commit `f9716c1`）
+- TODO（下次再說）: `gh auth refresh -s write:packages,read:packages` 讓未來 CLI 能管 GHCR
+- TODO: Phase D plan 加一條 Risk「Windows + SQLite locks」
+
+---
+
+## Risk Matrix（更新後）
 
 | Risk | Likelihood | Severity | Mitigation |
 |------|-----------|----------|------------|
-| Workflow permissions 沒開 → GHCR push 403 | 中（GitHub 預設值） | 高（整條鏈失敗） | Phase A1 提前確認 |
-| GHCR package private → 其他人拉不到 | 高（第一次推預設 private） | 中（個人用無影響） | Phase B3 改 public |
+| Workflow permissions 沒開 → GHCR push 403 | 中（GitHub 預設值） | 高（整條鏈失敗） | Phase A1 提前確認 ✓（本次踩到、修） |
+| GHCR package private → 其他人拉不到 | 高（第一次推預設 private） | 中（個人用無影響） | Phase B3 改 public（本次未做、需手動） |
 | Dockerfile build fail on ubuntu runner | 低（原作者已測） | 高 | Phase B 用 dry-run 早發現 |
-| `--force-with-lease` 在清理時誤刪別人推的 commit | 低（你是唯一 push 者） | 中 | 清理 Phase B2 慎重執行 |
-| 版本號撞 upstream 真實發的 rc.X | 低 | 中（image 衝突） | Task A4 選 `-tw.N` suffix |
-| Release notes 空白 | 低 | 低 | 第二次發版起 `--generate-notes` 有對照 |
-| 漏掉某個 backend env var → image 跑不起來 | 低 | 中 | Task C2 step 3 docker run 試一次 |
+| 版本號撞 upstream 真實發的 rc.X | 低 | 中（image 衝突） | Task A4 選 `-tw.N` suffix ✓ |
+| Release notes 空白 | 低 | 低 | 第二次發版起 `--generate-notes` 有對照 ✓ |
+| **SQLite lock 卡 git switch (Windows)** | **高** | **高** | release.sh 加預檢 ✓（本次踩到、修） |
+| **YAML multi-line string 縮排錯誤** | 中 | 高（workflow startup failure） | 用 --notes-file 替代 ✓（本次踩到、修） |
+| **gh CLI 預設指 upstream repo** | 中 | 低（query 404） | 一次 `gh repo set-default` 永久 ✓ |
 
 ---
 

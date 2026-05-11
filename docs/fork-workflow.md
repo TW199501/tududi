@@ -83,7 +83,7 @@ git push origin dev
 A single command:
 
 ```bash
-npm run release v0.1.0
+npm run release v1.1.0-rc.2-tw.1
 ```
 
 This wraps `scripts/release.sh`, which:
@@ -91,10 +91,10 @@ This wraps `scripts/release.sh`, which:
 1. Verifies you're on `dev` with a clean working tree
 2. Pushes `dev` to origin
 3. Switches to `release`, fast-forward merges `dev`
-4. Runs `scripts/create-version.sh v0.1.0`
-   - Bumps `package.json` version to `v0.1.0`
-   - Creates `release: v0.1.0` commit
-   - Creates annotated tag `v0.1.0`
+4. Runs `scripts/create-version.sh v1.1.0-rc.2-tw.1`
+   - Bumps `package.json` version
+   - Creates `release: v1.1.0-rc.2-tw.1` commit
+   - Creates annotated tag
 5. Pushes `release` + the tag to origin
 6. Returns to `dev` and merges the version bump commit in
 7. Prints URLs for Actions and Releases pages
@@ -102,7 +102,7 @@ This wraps `scripts/release.sh`, which:
 The tag push triggers `.github/workflows/docker-release.yml`, which:
 
 - Builds a Docker image
-- Pushes to `ghcr.io/tw199501/tududi:v0.1.0` and `:latest`
+- Pushes to `ghcr.io/tw199501/tududi:v1.1.0-rc.2-tw.1` and `:latest`
 - Opens a GitHub Release with auto-generated notes
 
 Build takes 3–5 minutes. Watch with:
@@ -115,7 +115,7 @@ gh run watch    # interactive
 After it finishes:
 
 ```bash
-docker pull ghcr.io/tw199501/tududi:v0.1.0
+docker pull ghcr.io/tw199501/tududi:v1.1.0-rc.2-tw.1
 ```
 
 ### Version numbering
@@ -212,8 +212,8 @@ git push origin dev
 |------|---------|
 | Daily commit | `git add . && git commit -m "..." && git push origin dev` |
 | Pull upstream changes | `npm run upstream:sync` |
-| Ship a release | `npm run release v0.1.0` |
+| Ship a release | `npm run release v1.1.0-rc.2-tw.1` |
 | Send PR to upstream | `npm run upstream:pr <feature>` |
 | Watch build progress | `gh run watch` |
 | List recent releases | `gh release list` |
-| Pull a built image | `docker pull ghcr.io/tw199501/tududi:v0.1.0` |
+| Pull a built image | `docker pull ghcr.io/tw199501/tududi:v1.1.0-rc.2-tw.1` |
