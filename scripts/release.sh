@@ -43,6 +43,48 @@ if [[ -n $(git status --porcelain) ]]; then
   exit 1
 fi
 
+# Detect a running SQLite connection. -shm/-wal sidecars only exist while
+# a SQLite connection is open. Release requires switching git branches that
+# disagree about whether the DB is tracked, and an open handle prevents the
+# swap on Windows ("Invalid argument" on unlink). Bail early with a clear
+# message instead of failing mid-pipeline.
+if [[ -e backend/database.sqlite-shm || -e backend/database.sqlite-wal ]]; then
+  cat >&2 <<MSG
+Error: backend/database.sqlite has an open connection (found -shm/-wal sidecars).
+       Release switches between branches that disagree on whether the DB is
+       tracked; an open SQLite handle prevents the swap on Windows.
+
+Fix:
+  1. Stop any running backend dev server (npm run backend:dev / nodemon / docker)
+  2. Remove the sidecar files:
+        rm backend/database.sqlite-shm backend/database.sqlite-wal
+  3. (Optional) Remove the dev DB itself if not needed for now:
+        rm backend/database.sqlite
+     Recreate later with: npm run db:init && npm run user:create -- ...
+  4. Re-run: npm run release $VERSION
+MSG
+  exit 1
+fi
+
+# Also guard against a stale backend/database.sqlite living in working tree
+# even with no -shm/-wal: release branch has it tracked, dev branch has it
+# untracked. Switching branches with a modified+tracked vs untracked diff
+# fails. Demand the user removes the file before continuing.
+if git ls-files --error-unmatch backend/database.sqlite >/dev/null 2>&1 ||
+   { [[ -e backend/database.sqlite ]] && [[ "$(git rev-parse --abbrev-ref HEAD)" == "dev" ]] && \
+     git ls-tree -r release --name-only | grep -q '^backend/database.sqlite$'; }; then
+  cat >&2 <<MSG
+Error: backend/database.sqlite exists in working tree but release branch
+       still tracks it. Switching branches will fail.
+
+Fix:
+  rm backend/database.sqlite
+  (Or stash via: git stash push --include-untracked)
+  Re-run: npm run release $VERSION
+MSG
+  exit 1
+fi
+
 if git show-ref --tags --verify --quiet "refs/tags/$VERSION"; then
   echo "Error: Tag $VERSION already exists." >&2
   exit 1
