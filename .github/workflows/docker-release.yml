@@ -57,6 +57,21 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
+      - name: Write release notes
+        env:
+          TAG: ${{ steps.ref.outputs.tag }}
+          OWNER: ${{ steps.owner.outputs.value }}
+        run: |
+          cat > /tmp/release-notes.md <<NOTES
+          ## Docker Image
+
+          \`\`\`bash
+          docker pull ghcr.io/$OWNER/tududi:$TAG
+          \`\`\`
+
+          Built from commit \`${{ github.sha }}\` on \`${{ github.ref_name }}\`.
+          NOTES
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -64,12 +79,4 @@ jobs:
           gh release create "${{ steps.ref.outputs.tag }}" \
             --title "${{ steps.ref.outputs.tag }}" \
             --generate-notes \
-            --notes "
-## Docker Image
-
-\`\`\`bash
-docker pull ghcr.io/${{ steps.owner.outputs.value }}/tududi:${{ steps.ref.outputs.tag }}
-\`\`\`
-
-Built from commit \`${{ github.sha }}\` on \`${{ github.ref_name }}\`.
-"
+            --notes-file /tmp/release-notes.md
