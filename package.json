@@ -60,7 +60,10 @@
     "docker:test-build": "bash scripts/test-docker-build.sh",
     "kill:all": "lsof -ti:8080,3002 | xargs kill -9 2>/dev/null || true",
     "mcp:start": "cd backend && node modules/mcp/server.js",
-    "mcp:dev": "cd backend && nodemon modules/mcp/server.js"
+    "mcp:dev": "cd backend && nodemon modules/mcp/server.js",
+    "release": "bash scripts/release.sh",
+    "upstream:sync": "bash scripts/sync-upstream.sh",
+    "upstream:pr": "bash scripts/pr-to-upstream.sh"
   },
   "keywords": [],
   "author": "",
