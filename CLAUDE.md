@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Tududi - Developer Guide
 
 This documentation is designed for AI assistants and developers working with the tududi codebase. For user-facing documentation, see [README.md](README.md). For contribution guidelines, see [CONTRIBUTING.md](.github/CONTRIBUTING.md).
@@ -18,6 +22,104 @@ npm install
 npm run db:init
 npm start  # Frontend on :8080, Backend on :3002
 ```
+
+---
+
+## Common Commands
+
+All commands run from the repo root unless noted. Scripts are split into `frontend:*` / `backend:*` variants; the un-prefixed aliases (`lint`, `format`) run both.
+
+**Run / develop**
+```bash
+npm start              # Both servers via scripts/start-all-dev.sh (frontend :8080, backend :3002)
+npm run frontend:dev   # Webpack dev server only (proxies /api to backend on :3002)
+npm run backend:dev    # Backend only, nodemon-watched
+npm run kill:all       # Free ports 8080 and 3002 if a server is stuck
+```
+
+**Build / lint / format** (CI runs `npm run lint` then build — both must pass)
+```bash
+npm run build          # Frontend production build: tsc --noEmit + webpack -> dist/
+npm run lint           # ESLint frontend + backend
+npm run lint:fix       # Auto-fix lint
+npm run format:fix     # Prettier write frontend + backend
+```
+
+**Tests**
+```bash
+npm test               # = backend:test (Jest, NODE_ENV=test, run from backend/)
+npm run frontend:test  # Frontend Jest (jsdom, ts-jest) — note: NOT included in `npm test`
+npm run test:ui        # Playwright E2E via e2e/bin/run-e2e.sh
+npm run backend:test:unit         # backend/tests/unit only
+npm run backend:test:integration  # backend/tests/integration only
+
+# Run a single backend test file or by name (Jest lives in backend/):
+cd backend && cross-env NODE_ENV=test npx jest tests/unit/tasks/recurring.test.js
+cd backend && cross-env NODE_ENV=test npx jest -t "creates a recurring task"
+# Single frontend test:
+npx jest frontend/utils/dateUtils.test.ts
+```
+
+**Database & migrations** (all proxy into `backend/`)
+```bash
+npm run db:init          # Initialize DB + first user
+npm run db:migrate       # Run pending migrations
+npm run db:status        # Show migration status
+npm run db:reset         # Drop + recreate
+npm run db:reset-and-seed   # Reset then seed dev data (NODE_ENV=development)
+npm run migration:create    # Scaffold a new migration in backend/migrations/
+npm run migration:undo      # Roll back the last migration
+npm run user:create         # Create a user interactively
+```
+
+Backend tests must run with `NODE_ENV=test` (the npm scripts set this). Several backend features are gated behind feature flags that default to off locally — CI enables `FF_ENABLE_BACKUPS`, `FF_ENABLE_CALDAV`, `FF_ENABLE_CALENDAR` when running backend tests. See `backend/.env.example` for all `FF_*` and `DISABLE_*` flags.
+
+**Fork / upstream workflow** (this `dev` branch tracks a downstream fork of `chrisvel/tududi`; these scripts are not present on upstream `main`)
+```bash
+npm run upstream:sync    # Sync this fork from upstream (scripts/sync-upstream.sh)
+npm run upstream:pr      # Open a PR back to upstream (scripts/pr-to-upstream.sh)
+npm run release          # Tag/cut a release (scripts/release.sh)
+```
+
+---
+
+## Architecture at a Glance
+
+The big-picture wiring that spans multiple files (read `backend/app.js` alongside any one module to see the full pattern):
+
+**Backend is a modular monolith.** Each feature lives in `backend/modules/<name>/` and exposes a router via its `index.js` (`module.exports = { routes }`). `app.js` imports every module and mounts it under a versioned base path:
+
+```js
+// backend/app.js
+const API_BASE_PATH = `/api/${process.env.API_VERSION || 'v1'}`;
+app.use(basePath, authModule.routes);        // public auth routes first
+app.use(`${basePath}/oidc`, oidcModule.routes);
+app.use(basePath, requireAuth);              // <-- everything mounted AFTER this line is auth-gated
+app.use(basePath, tasksModule.routes);
+app.use(basePath, projectsModule.routes);
+// ...all other modules
+```
+
+So **ordering in `app.js` matters**: routes registered before `app.use(basePath, requireAuth)` are public; everything after requires a session. `oauthRoutes` and `caldavRoutes` are mounted at the root (not under `basePath`) because external clients call them on fixed paths.
+
+**Inside a module**, responsibilities are split into conventional files (the `tasks` module is the richest example):
+- `routes.js` — Express handlers, request/response only
+- `repository.js` — Sequelize data access
+- `*Service.js` — business logic (e.g. `recurringTaskService.js`, `deferredTaskService.js`)
+- `core/`, `operations/`, `queries/`, `utils/` — serializers, builders, query-builders, validation
+
+To add a module: create `backend/modules/<name>/{index.js,routes.js,repository.js}`, then add one import + one `app.use(basePath, <name>Module.routes)` line in `app.js`. See [docs/backend-patterns.md](docs/backend-patterns.md).
+
+**Models** live flat in `backend/models/`, registered through `models/index.js` (Sequelize). Migrations in `backend/migrations/` are the source of truth for schema — never hand-edit applied migrations; add a new one.
+
+**Auth is multi-modal:** session cookies (`express-session` + `connect-session-sequelize`), personal API tokens, OAuth, OIDC, and CalDAV calendar tokens all coexist. `requireAuth` is the session gate; tokens/oauth are handled by their own middleware/modules.
+
+**Frontend** is a single React SPA (`frontend/index.tsx` -> `App.tsx` -> `Layout.tsx`). Data flow:
+- One global Zustand store: `frontend/store/useStore.ts`
+- Server state via SWR + per-resource service clients in `frontend/utils/<resource>Service.ts` (e.g. `tasksService.ts`) — these are the API boundary; components call services, not `fetch` directly
+- In dev the webpack server (`webpack.config.js`) proxies `/api` -> `http://localhost:3002`, forwarding cookies for session auth
+
+**Background work:** `node-cron` schedulers (e.g. `backend/modules/tasks/taskScheduler.js`, CalDAV sync) start from `app.js`; disable with `DISABLE_SCHEDULER=true`. Telegram polling starts similarly (`DISABLE_TELEGRAM=true` to skip).
 
 ---
 
