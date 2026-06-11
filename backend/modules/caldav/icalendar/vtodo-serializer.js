@@ -27,8 +27,14 @@ function serializeTaskToVTODO(task, options = {}) {
 
     if (task.due_date) {
         try {
-            const dueTime = ICAL.Time.fromJSDate(new Date(task.due_date), true);
-            vtodo.addPropertyWithValue('due', dueTime);
+            const d = new Date(task.due_date);
+            const dueDate = new ICAL.Time({
+                year: d.getUTCFullYear(),
+                month: d.getUTCMonth() + 1,
+                day: d.getUTCDate(),
+                isDate: true,
+            });
+            vtodo.addPropertyWithValue('due', dueDate);
         } catch (error) {
             console.error('Error formatting due date:', error);
         }
@@ -36,11 +42,14 @@ function serializeTaskToVTODO(task, options = {}) {
 
     if (task.defer_until) {
         try {
-            const startTime = ICAL.Time.fromJSDate(
-                new Date(task.defer_until),
-                true
-            );
-            vtodo.addPropertyWithValue('dtstart', startTime);
+            const d = new Date(task.defer_until);
+            const startDate = new ICAL.Time({
+                year: d.getUTCFullYear(),
+                month: d.getUTCMonth() + 1,
+                day: d.getUTCDate(),
+                isDate: true,
+            });
+            vtodo.addPropertyWithValue('dtstart', startDate);
         } catch (error) {
             console.error('Error formatting defer_until date:', error);
         }
@@ -150,6 +159,27 @@ function serializeTaskToVTODO(task, options = {}) {
             vtodo.addPropertyWithValue('last-modified', modifiedTime);
         } catch (error) {
             console.error('Error formatting updated_at date:', error);
+        }
+    }
+
+    if (task.reminder_at) {
+        try {
+            const valarm = new ICAL.Component('valarm');
+            valarm.addPropertyWithValue('action', 'DISPLAY');
+            valarm.addPropertyWithValue('description', 'Reminder');
+
+            const triggerTime = ICAL.Time.fromJSDate(
+                new Date(task.reminder_at),
+                true
+            );
+            const triggerProp = new ICAL.Property('trigger');
+            triggerProp.resetType('date-time');
+            triggerProp.setValue(triggerTime);
+            valarm.addProperty(triggerProp);
+
+            vtodo.addSubcomponent(valarm);
+        } catch (error) {
+            console.error('Error formatting reminder_at:', error);
         }
     }
 

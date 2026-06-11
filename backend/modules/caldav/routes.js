@@ -1,7 +1,11 @@
 const express = require('express');
 const caldavAuth = require('./middleware/caldav-auth');
 const xmlParser = require('./middleware/xml-parser');
-const { handleWellKnown } = require('./protocol/discovery');
+const {
+    handleWellKnown,
+    handleRootPropfind,
+    handlePrincipalPropfind,
+} = require('./protocol/discovery');
 const { handleOptions } = require('./webdav/options');
 const { handlePropfind } = require('./webdav/propfind');
 const { handleReport } = require('./webdav/report');
@@ -15,8 +19,33 @@ const { requireAuth } = require('../../middleware/auth');
 
 const router = express.Router();
 
-router.get('/.well-known/caldav', handleWellKnown);
+// GET redirects to /caldav/ per RFC 6764; PROPFIND returns root discovery for iOS accountsd
+router.all('/.well-known/caldav', (req, res, next) => {
+    if (req.method === 'GET') return handleWellKnown(req, res, next);
+    if (req.method !== 'PROPFIND') return next();
+    xmlParser(req, res, () =>
+        caldavAuth(req, res, () => handleRootPropfind(req, res, next))
+    );
+});
 
+// iOS accountsd probes PROPFIND / and PROPFIND /principals/ during account setup and refresh.
+// Gate on PROPFIND only — running caldavAuth on GET / would send WWW-Authenticate: Basic
+// and replace the web app login page with a browser Basic-Auth prompt.
+router.all('/', (req, res, next) => {
+    if (req.method !== 'PROPFIND') return next();
+    xmlParser(req, res, () =>
+        caldavAuth(req, res, () => handleRootPropfind(req, res, next))
+    );
+});
+
+router.all('/principals/', (req, res, next) => {
+    if (req.method !== 'PROPFIND') return next();
+    xmlParser(req, res, () =>
+        caldavAuth(req, res, () => handleRootPropfind(req, res, next))
+    );
+});
+
+router.options('/caldav/:username/', xmlParser, caldavAuth, handleOptions);
 router.options(
     '/caldav/:username/tasks/',
     xmlParser,
@@ -39,6 +68,8 @@ function registerMethod(method, path, handler) {
     });
 }
 
+registerMethod('PROPFIND', '/caldav/', handleRootPropfind);
+registerMethod('PROPFIND', '/caldav/:username/', handlePrincipalPropfind);
 registerMethod('PROPFIND', '/caldav/:username/tasks/', handlePropfind);
 registerMethod('PROPFIND', '/caldav/:username/tasks/:uid', handlePropfind);
 

@@ -59,7 +59,22 @@ module.exports = {
 
         let updatedCount = 0;
         for (const user of usersWithPrefs) {
-            const prefs = user.notification_preferences;
+            let prefs = user.notification_preferences;
+            if (typeof prefs === 'string') {
+                try {
+                    prefs = JSON.parse(prefs);
+                } catch {
+                    prefs = {};
+                }
+            }
+            // Handle double-encoded JSON caused by bug in 20251209000001
+            if (typeof prefs === 'string') {
+                try {
+                    prefs = JSON.parse(prefs);
+                } catch {
+                    prefs = {};
+                }
+            }
             let needsUpdate = false;
 
             // Check if all required keys exist
