@@ -1,0 +1,676 @@
+# Instincts generated from https://github.com/TW199501/tududi
+# Generated: 2026-06-11T00:50:11.238Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: tududi-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: fix, release
+
+## Evidence
+
+- 38 commits analyzed
+- Detected conventional commit pattern
+- Examples: fix: Update task count display when tasks are created or deleted (#1116), release: v1.1.0-rc.3
+
+---
+id: tududi-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Commit Length
+
+## Action
+
+Write moderate-length commit messages (~68 characters)
+
+## Evidence
+
+- Average commit message length: 68 chars
+- Based on 38 commits
+
+---
+id: tududi-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: tududi-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: tududi-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: tududi-test-framework
+trigger: "when writing tests"
+confidence: 0.9
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Test Framework
+
+## Action
+
+Use jest as the test framework
+
+## Evidence
+
+- Test framework detected: jest
+- File pattern: *.test.js
+
+---
+id: tududi-test-naming
+trigger: "when creating a test file"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Test Naming
+
+## Action
+
+Name test files using the pattern: *.test.js
+
+## Evidence
+
+- File pattern: *.test.js
+- Consistent across test files
+
+---
+id: tududi-test-mocking
+trigger: "when mocking dependencies in tests"
+confidence: 0.75
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Test Mocking
+
+## Action
+
+Use jest.mock for mocking
+
+## Evidence
+
+- Mocking pattern detected: jest.mock
+- Consistent across test files
+
+---
+id: tududi-test-types
+trigger: "when planning tests for a feature"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Test Types
+
+## Action
+
+Write unit, integration tests to match project standards
+
+## Evidence
+
+- Test types detected: unit, integration
+- Coverage config: yes
+
+---
+id: tududi-workflow-database-migration
+trigger: "when modifying the database schema or adding tables"
+confidence: 0.65
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Workflow Database Migration
+
+## Action
+
+Follow the database-migration workflow:
+1. Create migration file
+2. Update schema definitions
+3. Generate/update types
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~3x per month
+- Files: migrations/*
+
+---
+id: tududi-workflow-feature-development
+trigger: "when implementing a new feature"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Workflow Feature Development
+
+## Action
+
+Follow the feature-development workflow:
+1. Add feature implementation
+2. Add tests for feature
+3. Update documentation
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~11x per month
+- Files: frontend/components/project/*, frontend/components/area/*, frontend/components/tag/*
+
+---
+id: tududi-workflow-add-or-fix-csrf-token-in-frontend-api-requests
+trigger: "when doing add or fix csrf token in frontend api requests"
+confidence: 0.65
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Workflow Add Or Fix Csrf Token In Frontend Api Requests
+
+## Action
+
+Follow the add-or-fix-csrf-token-in-frontend-api-requests workflow:
+1. Identify the frontend component making the API request.
+2. Import or use getCsrfToken from csrfService.
+3. Add the 'x-csrf-token' header to the fetch or axios request.
+4. Test the request to ensure backend accepts it.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~3x per month
+- Files: frontend/components/Project/BannerEditModal.tsx, frontend/components/Project/ProjectDetails.tsx, frontend/components/Profile/tabs/NotificationsTab.tsx
+
+---
+id: tududi-workflow-fix-caldav-protocol-or-compatibility-issues
+trigger: "when doing fix caldav protocol or compatibility issues"
+confidence: 0.7
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Workflow Fix Caldav Protocol Or Compatibility Issues
+
+## Action
+
+Follow the fix-caldav-protocol-or-compatibility-issues workflow:
+1. Identify the failing CalDAV operation or endpoint (e.g., PROPFIND, REPORT, discovery).
+2. Update or add handler in backend/modules/caldav/ (routes.js, protocol/discovery.js, webdav/*.js, api/*-controller.js).
+3. Add or update integration/unit tests for the new/fixed behavior.
+4. Test with the target CalDAV client (e.g., iOS Reminders).
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~4x per month
+- Files: backend/modules/caldav/protocol/discovery.js, backend/modules/caldav/routes.js, backend/modules/caldav/webdav/propfind.js
+
+---
+id: tududi-workflow-backend-migration-json-fix
+trigger: "when doing backend migration json fix"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Workflow Backend Migration Json Fix
+
+## Action
+
+Follow the backend-migration-json-fix workflow:
+1. Identify the migration file and the affected column.
+2. Add JSON.parse (possibly multiple times) before property access.
+3. Conditionally update DB rows only when needed.
+4. Test migration on real or test data to ensure idempotency and correctness.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: backend/migrations/20251209000001-add-telegram-to-notification-preferences.js, backend/migrations/20260509000001-ensure-notification-preferences.js
+
+---
+id: tududi-workflow-add-or-update-backend-auth-middleware
+trigger: "when doing add or update backend auth middleware"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Workflow Add Or Update Backend Auth Middleware
+
+## Action
+
+Follow the add-or-update-backend-auth-middleware workflow:
+1. Update or add logic in backend/middleware/auth.js or related modules.
+2. Update provider config or token validation logic.
+3. Add or update tests for the new or fixed behavior.
+4. Document any new environment variables or config options.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: backend/middleware/auth.js, backend/modules/oauth/protectedResource.js, backend/modules/oidc/providerConfig.js
+
+---
+id: tududi-workflow-fix-timezone-or-date-handling-in-tasks
+trigger: "when doing fix timezone or date handling in tasks"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/TW199501/tududi
+---
+
+# Tududi Workflow Fix Timezone Or Date Handling In Tasks
+
+## Action
+
+Follow the fix-timezone-or-date-handling-in-tasks workflow:
+1. Update backend date parsing/validation logic (recurringTaskService.js, validation.js, etc).
+2. Update frontend date parsing/display logic (TaskRecurrenceCard.tsx, TaskDetails.tsx).
+3. Add or update tests to cover edge cases (timezones, same-day, etc).
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: backend/modules/tasks/operations/recurring.js, backend/modules/tasks/recurringTaskService.js, backend/modules/tasks/utils/validation.js
+
+---
+id: tududi-camelcase-files
+trigger: "When creating or renaming a file in the codebase"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Camelcase Files
+
+## Action
+
+Name the file using camelCase (e.g., myComponent.js)
+
+## Evidence
+
+- Pattern in namingConventions.files
+- Seen in frontend/components/Project/BannerEditModal.tsx
+
+---
+id: tududi-camelcase-functions
+trigger: "When defining a function"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Camelcase Functions
+
+## Action
+
+Use camelCase for function names (e.g., getCsrfToken)
+
+## Evidence
+
+- Pattern in namingConventions.functions
+- Seen in csrfService.getCsrfToken
+
+---
+id: tududi-pascalcase-classes
+trigger: "When defining a class"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Pascalcase Classes
+
+## Action
+
+Use PascalCase for class names (e.g., TaskService)
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: tududi-screaming-snake-constants
+trigger: "When declaring a constant"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Screaming Snake Constants
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for constant names (e.g., MAX_TASKS)
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: tududi-relative-imports
+trigger: "When importing modules in JavaScript/TypeScript files"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Relative Imports
+
+## Action
+
+Use relative import paths (e.g., import x from '../utils')
+
+## Evidence
+
+- Pattern in importStyle
+- Seen in frontend/components/Project/BannerEditModal.tsx
+
+---
+id: tududi-named-exports
+trigger: "When exporting functions, classes, or constants"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Named Exports
+
+## Action
+
+Use named exports instead of default exports
+
+## Evidence
+
+- Pattern in exportStyle
+
+---
+id: tududi-jest-test-pattern
+trigger: "When writing a test file"
+confidence: 0.9
+domain: testing
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Jest Test Pattern
+
+## Action
+
+Name the test file with the pattern *.test.js and use Jest as the test framework
+
+## Evidence
+
+- Pattern in testing.filePattern
+- Seen in backend/tests/unit/utils/validation.test.js
+
+---
+id: tududi-jest-mock-style
+trigger: "When mocking dependencies in tests"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Jest Mock Style
+
+## Action
+
+Use jest.mock to mock modules or functions
+
+## Evidence
+
+- Pattern in testing.mockingStyle
+- Seen in backend/tests/unit/modules/oidc/providerConfig.test.js
+
+---
+id: tududi-test-coverage-config
+trigger: "When configuring or running tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Test Coverage Config
+
+## Action
+
+Ensure test coverage is collected and reported (coverageConfig: true)
+
+## Evidence
+
+- Pattern in testing.coverageConfig
+- Seen in backend/jest.config.js
+
+---
+id: tududi-commit-conventional-format
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Commit Conventional Format
+
+## Action
+
+Use conventional commit prefixes (e.g., fix, feat, release, docs) followed by a colon and a short description
+
+## Evidence
+
+- Pattern in commits.prefixes
+- Seen in commit 'fix: Add CSRF token to project image upload request (#1119)'
+
+---
+id: tududi-commit-length-guideline
+trigger: "When composing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Commit Length Guideline
+
+## Action
+
+Keep the commit message around 68 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength
+- Seen in commit examples
+
+---
+id: tududi-add-csrf-token-frontend-api
+trigger: "When adding or fixing a frontend API request that interacts with the backend"
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Add Csrf Token Frontend Api
+
+## Action
+
+Add the 'x-csrf-token' header using getCsrfToken from csrfService
+
+## Evidence
+
+- Workflow: add-or-fix-csrf-token-in-frontend-api-requests
+- Seen in commits updating BannerEditModal.tsx, ProjectDetails.tsx
+
+---
+id: tududi-fix-caldav-compatibility
+trigger: "When a CalDAV client fails to connect, sync, or discover calendars"
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Fix Caldav Compatibility
+
+## Action
+
+Update or add CalDAV protocol handlers and corresponding tests in backend/modules/caldav/
+
+## Evidence
+
+- Workflow: fix-caldav-protocol-or-compatibility-issues
+- Seen in backend/modules/caldav/protocol/discovery.js
+
+---
+id: tududi-fix-json-migration
+trigger: "When a migration fails or corrupts data due to JSON parsing/encoding issues"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Fix Json Migration
+
+## Action
+
+Add JSON.parse (possibly multiple times) before property access and test migration for correctness
+
+## Evidence
+
+- Workflow: backend-migration-json-fix
+- Seen in backend/migrations/20260509000001-ensure-notification-preferences.js
+
+---
+id: tududi-update-backend-auth-middleware
+trigger: "When adding or fixing authentication/authorization logic in the backend"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Update Backend Auth Middleware
+
+## Action
+
+Update backend/middleware/auth.js or related modules and add/update tests
+
+## Evidence
+
+- Workflow: add-or-update-backend-auth-middleware
+- Seen in backend/middleware/auth.js, backend/modules/oidc/providerConfig.js
+
+---
+id: tududi-fix-task-timezone
+trigger: "When users report tasks showing on wrong days or validation errors for same-day defer/due"
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: TW199501/tududi
+---
+
+# Tududi Fix Task Timezone
+
+## Action
+
+Update backend and frontend date handling logic and add tests for timezone edge cases
+
+## Evidence
+
+- Workflow: fix-timezone-or-date-handling-in-tasks
+- Seen in backend/modules/tasks/recurringTaskService.js, frontend/components/Task/TaskDetails/TaskRecurrenceCard.tsx
+
